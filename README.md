@@ -11,6 +11,7 @@ tfenv list
 ```bash
 terraform init # moduleとしてimportさせないとサブディレクトリは認識されない
 terraform plan #事前確認
+terraform plan -var-file env/dev.tfvars
 terraform apply
 terraform apply -var "instance_name=YetAnotherName" # var.instance_name
 terraform destroy
