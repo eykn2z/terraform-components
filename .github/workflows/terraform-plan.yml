@@ -13,11 +13,11 @@ jobs:
       id-token: "write"
     env:
       GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
-      GOOGLE_APPLICATION_CREDENTIALS: "/tmp/gcp-sa-key.json"
-      ENV: "aws"
-      DEPLOY_BRANCH: "deploy"
+      GOOGLE_APPLICATION_CREDENTIALS: /tmp/gcp-sa-key.json
+      ENV: aws
+      DEPLOY_BRANCH: deploy
       PROJECT_NUMBER: 542927638574
-      PROJECT_NAME: "practice-408205"
+      PROJECT_NAME: practice-408205
     steps:
       - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v3
@@ -26,13 +26,13 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: "us-east-1"
-      - id: "auth"
-        name: "Authenticate to Google Cloud"
-        uses: "google-github-actions/auth@v1"
-        with:
-          workload_identity_provider: "projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/mypool/providers/myprovider"
-          service_account: github-actions@practice-408205.iam.gserviceaccount.com
+          aws-region: us-east-1
+      # - id: "auth"
+      #   name: Authenticate to Google Cloud
+      #   uses: google-github-actions/auth@v1
+      #   with:
+      #     workload_identity_provider: projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/mypool/providers/myprovider
+      #     service_account: github-actions@practice-408205.iam.gserviceaccount.com
       - name: Terraform fmt
         id: fmt
         run: terraform fmt -check
