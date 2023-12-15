@@ -8,12 +8,16 @@ jobs:
   terraform:
     name: Terraform
     runs-on: ubuntu-latest
+    permissions:
+      contents: "read"
+      id-token: "write"
     env:
       GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
       GOOGLE_APPLICATION_CREDENTIALS: "/tmp/gcp-sa-key.json"
       ENV: "aws"
       DEPLOY_BRANCH: "deploy"
-      PROJECT_NUMBER: "practice-408205"
+      PROJECT_NUMBER: 542927638574
+      PROJECT_NAME: "practice-408205"
     steps:
       - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v3
@@ -28,7 +32,7 @@ jobs:
         uses: "google-github-actions/auth@v1"
         with:
           workload_identity_provider: "projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/mypool/providers/myprovider"
-          service_account: "github-actions@practice-408205.iam.gserviceaccount.com"
+          project_id: $PROJECT_NAME
       - name: Terraform fmt
         id: fmt
         run: terraform fmt -check
