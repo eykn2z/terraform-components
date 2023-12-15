@@ -22,7 +22,7 @@ terrafom output
 ```
 terraform workspace new aws
 terraform workspace new gcp
-terraform workspace use aws
+terraform workspace select aws
 ```
 
 # 共通パラメータ

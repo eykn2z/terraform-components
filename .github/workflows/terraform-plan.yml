@@ -1,5 +1,5 @@
-name: learn-github-actions
-run-name: ${{ github.actor }} is learning GitHub Actions
+name: terraform
+run-name: terraform
 on: [push]
 jobs:
   terraform:
@@ -14,9 +14,13 @@ jobs:
         run: terraform fmt -check
         continue-on-error: true
 
-      - name: Terraform Init
+      - name: Terraform init &setup
         id: init
-        run: terraform init
+        run: |
+          terraform init
+          terraform workspace new aws
+          terraform workspace new gcp
+          terraform workspace select aws
 
       - name: Terraform Validate
         id: validate
