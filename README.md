@@ -47,4 +47,49 @@ deployブランチにpushがあった場合applyする
 - prod
   - より厳密なマージルール
 
+# コーディング規約
+https://miraitranslate-tech.hatenablog.jp/entry/2023/03/10/120000
 
+# 差分
+apply後、planすると差分が表示される
+```
+% terraform plan --detailed-exitcode
+module.flask.module.aws[0].aws_instance.flask_server_aws: Refreshing state... [id=i-0e4b1d033f10aee3c]
+
+Terraform used the selected providers to generate the following execution plan. Resource actions
+are indicated with the following symbols:
+  ~ update in-place
+
+Terraform will perform the following actions:
+
+  # module.flask.module.aws[0].aws_instance.flask_server_aws will be updated in-place
+  ~ resource "aws_instance" "flask_server_aws" {
+        id                                   = "i-0e4b1d033f10aee3c"
+      ~ tags                                 = {
+            "Name" = "FlaskServerAWS"
+          - "Test" = "TestValue" -> null
+        }
+      ~ tags_all                             = {
+          - "Test" = "TestValue" -> null
+            # (1 unchanged element hidden)
+        }
+        # (31 unchanged attributes hidden)
+
+        # (8 unchanged blocks hidden)
+    }
+
+Plan: 0 to add, 1 to change, 0 to destroy.
+
+───────────────────────────────────────────────────────────────────────────────────────────────────
+
+Note: You didn't use the -out option to save this plan, so Terraform can't guarantee to take
+exactly these actions if you run "terraform apply" now.
+```
+
+# terraform管理repository以外からの操作禁止
+ユーザーに割り当てるポリシーに禁止事項を追加
+管理repository用ロールは操作を許可
+
+# cloudformationのようにマネジメントコンソールからも作成したリソースをグループ化したい
+tag付のルール化
+AWS: Service Catalogの活用
