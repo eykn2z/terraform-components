@@ -1,13 +1,23 @@
-name: terraform
-run-name: terraform
-on: [push]
+name: terraform-check
+on:
+  push:
+    branches:
+      - main
+  pull_request:
 jobs:
   terraform:
     name: Terraform
     runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+      GOOGLE_APPLICATION_CREDENTIALS: "/tmp/gcp-sa-key.json"
+      ENV: "aws"
     steps:
       - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v3
+      - run: echo "$GCP_SA_KEY" > $GOOGLE_APPLICATION_CREDENTIALS
 
       - name: Terraform fmt
         id: fmt
@@ -20,7 +30,7 @@ jobs:
           terraform init
           terraform workspace new aws
           terraform workspace new gcp
-          terraform workspace select aws
+          terraform workspace select $ENV
 
       - name: Terraform Validate
         id: validate
