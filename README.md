@@ -93,3 +93,11 @@ exactly these actions if you run "terraform apply" now.
 # cloudformationのようにマネジメントコンソールからも作成したリソースをグループ化したい
 tag付のルール化
 AWS: Service Catalogの活用
+
+# state管理
+リソースのstateはterraform applyされた環境に残る.tfstateで管理される
+共同開発する際は.tfstateを共有する/リモートバックエンドを使う
+> - Amazon S3: AWSのS3バケットを使用して状態ファイルを保存し、オプションでDynamoDBを使ってロックと一貫性の管理を行う
+- Terraform Cloud/Enterprise: HashiCorpが提供するTerraform CloudやTerraform Enterpriseを使用して、状態ファイルを安全に管理
+- Google Cloud Storage: GCPのCloud Storageバケットを使用して状態ファイルを保存
+- Azure Blob Storage: AzureのBlob Storageを使用して状態ファイルを保存
