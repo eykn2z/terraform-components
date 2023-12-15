@@ -13,6 +13,7 @@ jobs:
       GOOGLE_APPLICATION_CREDENTIALS: "/tmp/gcp-sa-key.json"
       ENV: "aws"
       DEPLOY_BRANCH: "deploy"
+      PROJECT_NUMBER: "practice-408205"
     steps:
       - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v3
@@ -27,7 +28,7 @@ jobs:
         name: "Authenticate to Google Cloud"
         uses: "google-github-actions/auth@v1"
         with:
-          workload_identity_provider: "projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/mypool/providers/myprovider"
+          workload_identity_provider: "projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/mypool/providers/myprovider"
           service_account: "github-actions@practice-408205.iam.gserviceaccount.com"
       - name: Terraform fmt
         id: fmt
