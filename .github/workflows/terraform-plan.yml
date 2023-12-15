@@ -32,7 +32,7 @@ jobs:
         uses: "google-github-actions/auth@v1"
         with:
           workload_identity_provider: "projects/$PROJECT_NUMBER/locations/global/workloadIdentityPools/mypool/providers/myprovider"
-          project_id: $PROJECT_NAME
+          service_account: github-actions@practice-408205.iam.gserviceaccount.com
       - name: Terraform fmt
         id: fmt
         run: terraform fmt -check
