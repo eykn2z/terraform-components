@@ -14,11 +14,22 @@ jobs:
       GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
       GOOGLE_APPLICATION_CREDENTIALS: "/tmp/gcp-sa-key.json"
       ENV: "aws"
+      DEPLOY_BRANCH: "deploy"
     steps:
       - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v3
       - run: echo "$GCP_SA_KEY" > $GOOGLE_APPLICATION_CREDENTIALS
-
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: $AWS_ACCESS_KEY_ID
+          aws-secret-access-key: $AWS_SECRET_ACCESS_KEY
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v1"
+        with:
+          workload_identity_provider: "projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/mypool/providers/myprovider"
+          service_account: "github-actions@practice-408205.iam.gserviceaccount.com"
       - name: Terraform fmt
         id: fmt
         run: terraform fmt -check
@@ -39,4 +50,12 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: terraform plan -no-color
-        continue-on-error: true
+        continue-on-error: false
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/$DEPLOY_BRANCH' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false
