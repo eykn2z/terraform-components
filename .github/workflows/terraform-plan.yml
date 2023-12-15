@@ -1,11 +1,23 @@
+permissions:
+  pull-requests: write
 steps:
+- uses: actions/checkout@v3
 - uses: hashicorp/setup-terraform@v3
 
-- run: terraform init
+- name: Terraform fmt
+  id: fmt
+  run: terraform fmt -check
+  continue-on-error: true
 
-- id: plan
+- name: Terraform Init
+  id: init
+  run: terraform init
+
+- name: Terraform Validate
+  id: validate
+  run: terraform validate -no-color
+
+- name: Terraform Plan
+  id: plan
   run: terraform plan -no-color
-
-- run: echo ${{ steps.plan.outputs.stdout }}
-- run: echo ${{ steps.plan.outputs.stderr }}
-- run: echo ${{ steps.plan.outputs.exitcode }}
+  continue-on-error: true
