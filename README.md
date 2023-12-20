@@ -92,7 +92,7 @@ exactly these actions if you run "terraform apply" now.
 
 # cloudformationのようにマネジメントコンソールからも作成したリソースをグループ化したい
 - tag付のルール化
-- AWS: Service Catalogの活用
+- AWS: Service Catalogの1活用
 
 # state管理
 - リソースのstateはterraform applyされた環境に残る.tfstateで管理される

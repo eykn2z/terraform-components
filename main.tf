@@ -9,6 +9,7 @@ module "flask" {
   count = 0
 }
 
-module "eks" {
+module "eks_practice" {
   source = "./modules/03_eks"
 }
+
