@@ -10,18 +10,18 @@ module "eks" {
 
   cluster_endpoint_private_access = true
   cluster_endpoint_public_access  = true
-    create_cluster_security_group   = true
-    create_node_security_group      = true
-    eks_managed_node_groups = {
-      ng-1 = {
-        desired_capacity        = 2
-        max_capacity            = 2
-        min_capacity            = 2
-        launch_template_id      = aws_launch_template.eks_example.id
-        launch_template_version = aws_launch_template.eks_example.latest_version
-        #   cluster_primary_security_group_id = aws_security_group.node_example.id
-      }
+  create_cluster_security_group   = true
+  create_node_security_group      = true
+  eks_managed_node_groups = {
+    ng-1 = {
+      desired_capacity        = 2
+      max_capacity            = 2
+      min_capacity            = 2
+      launch_template_id      = aws_launch_template.eks_example.id
+      launch_template_version = aws_launch_template.eks_example.latest_version
+      #   cluster_primary_security_group_id = aws_security_group.node_example.id
     }
+  }
 
   tags = {
     Terraform   = "true",
@@ -29,12 +29,9 @@ module "eks" {
   }
 }
 
-data "aws_eks_cluster" "cluster" {
-  name = local.cluster_name
-}
 
 data "aws_eks_cluster_auth" "cluster" {
-  name = local.cluster_name
+  name       = local.cluster_name
 }
 
 resource "aws_launch_template" "eks_example" {

@@ -2,3 +2,4 @@
 .terraform.*
 *.tfstate
 *.tfstate.*
+modules/03_eks/manifests/complete-demo.yaml
