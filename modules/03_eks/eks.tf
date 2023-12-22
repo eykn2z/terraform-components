@@ -31,7 +31,7 @@ module "eks" {
 
 
 data "aws_eks_cluster_auth" "cluster" {
-  name       = local.cluster_name
+  name = local.cluster_name
 }
 
 resource "aws_launch_template" "eks_example" {
@@ -47,4 +47,14 @@ resource "aws_launch_template" "eks_example" {
 resource "aws_autoscaling_attachment" "eks_example" {
   autoscaling_group_name = module.eks.eks_managed_node_groups_autoscaling_group_names[0]
   lb_target_group_arn    = aws_lb_target_group.example.arn
+}
+
+output "cluster_endpoint" {
+  value = module.eks.cluster_endpoint
+}
+output "cluster_certificate_authority_data" {
+  value = module.eks.cluster_certificate_authority_data
+}
+output "cluster_token" {
+  value = data.aws_eks_cluster_auth.cluster.token
 }
