@@ -101,3 +101,5 @@ exactly these actions if you run "terraform apply" now.
     > - Terraform Cloud/Enterprise: HashiCorpが提供するTerraform CloudやTerraform Enterpriseを使用して、状態ファイルを安全に管理
     > - Google Cloud Storage: GCPのCloud Storageバケットを使用して状態ファイルを保存
     > - Azure Blob Storage: AzureのBlob Storageを使用して状態ファイルを保存
+- S3のリモートバックエンドはS3バケットの管理が必要になるので、大人しくTerraform Cloudでマージトリガーでapplyするようにするでよさそう
+  - https://qiita.com/hiyanger/items/e60ed7600d0cda120482
