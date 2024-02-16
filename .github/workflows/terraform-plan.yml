@@ -41,7 +41,7 @@ jobs:
       - name: Terraform init &setup
         id: init
         run: |
-          terraform init
+          terraform init -backend=false
           terraform workspace new aws
           terraform workspace new gcp
           terraform workspace select $ENV
