@@ -1,6 +1,8 @@
 # description
 terraform関連の検証リソースをmodule化
+
 main.tfにmodule文を書き、実際に作成したいリソースのcountを増やすことによって利用する
+
 tfstateはs3,dynamodbで管理する
 
 # install
