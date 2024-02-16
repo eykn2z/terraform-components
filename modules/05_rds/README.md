@@ -87,7 +87,7 @@ $ aws rds describe-orderable-db-instance-options --engine aurora-mysql --db-inst
   skip_final_snapshot         = true
   db_subnet_group_name        = aws_db_subnet_group.rds.name
   # multi_az=true
-}
+  }
   ```
   ```
   Error: creating RDS DB Instance (terraform-20240216111518034600000001): InvalidParameterCombination: Invalid iops to storage (GB) ratio for engine name aurora-mysql and storage type aurora: 0.0000
@@ -103,8 +103,8 @@ $ aws rds describe-orderable-db-instance-options --engine aurora-mysql --db-inst
   - 別azにきちんと建てたい場合は明示する
 
 ## クロスリージョンレプリケーション
-auroraは元々multi_az指定が出来る
-リージョンにレプリケーションすることで耐障害性(地理的障害への対応)を向上させる
+- auroraは元々multi_az指定が出来る
+- リージョンにレプリケーションすることで耐障害性(地理的障害への対応)を向上させる
 ```
 # プライマリリージョンのプロバイダ
 provider "aws" {
