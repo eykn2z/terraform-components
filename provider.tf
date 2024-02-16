@@ -10,7 +10,7 @@ terraform {
     }
   }
   backend "s3" {
-    bucket  = "example-terraform-state-000001"
+    bucket  = "terraform-state-87136"
     region  = "us-east-1"
     key     = "terraform.tfstate"
     encrypt = true
@@ -19,35 +19,19 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
+
+  default_tags {
+    tags = {
+      created_by = "terraform"
+      env = terraform.workspace
+    }
+  }
 }
 
 provider "google" {
   project = var.gcp_project
   region  = var.gcp_region
   zone    = var.gcp_zone
-}
-
-resource "aws_s3_bucket" "terraform_state" {
-  bucket = "example-terraform-state-000001"
-}
-
-resource "aws_s3_bucket_versioning" "versioning_example" {
-  bucket = aws_s3_bucket.terraform_state.id
-  versioning_configuration {
-    status = "Enabled"
-  }
-}
-
-resource "aws_dynamodb_table" "terraform_state_lock" {
-  name           = "terraform_state_lock"
-  read_capacity  = 1
-  write_capacity = 1
-  hash_key       = "LockID"
-
-  attribute {
-    name = "LockID"
-    type = "S"
-  }
 }
 
 
