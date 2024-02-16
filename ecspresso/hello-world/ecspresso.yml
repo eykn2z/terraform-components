@@ -1,0 +1,6 @@
+region: us-east-1
+cluster: hello-world
+service: hello-world-service
+# service_definition: ecs-service-def.json
+task_definition: ecs-task-def.json
+timeout: "10m0s"
