@@ -13,12 +13,6 @@
           "awslogs-stream-prefix": "ecs"
         }
       },
-      "environment": [
-        {
-            "name": "variable",
-            "value": "value"
-        }
-      ],
       "name": "hello-world",
       "portMappings": [
         {

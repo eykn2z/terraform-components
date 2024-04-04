@@ -15,20 +15,25 @@ tfenv use $tf_version
 ```
 2. awsのCLIを利用可能にする
 3. S3, DynamoDBでstate管理を行う
+4. backend
 ```bash
-cd tfstate
+cd terraform/local
 terraform init
 terraform plan
 terrafrom apply --auto-approve
 ```
-4. main.tfに記載がある各モジュールのcountを任意で1にする
-5. 実行
+1. main.tfに記載がある各モジュールのcountを任意で1にする
+2. 実行
 ```bash
-terraform init
+cd terraform
+export AWS_PROFILE=default
+env=$AWS_PROFILE
+terraform workspace select $env
+terraform init -reconfigure -backend-config="bucket=practice-terraform-state-${env}"
 terraform plan
 terrafrom apply --auto-approve
 ```
-6. 削除
+1. 削除
 ```bash
 terraform destroy --auto-approve
 ```

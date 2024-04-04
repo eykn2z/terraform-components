@@ -1,0 +1,139 @@
+openapi: 3.0.0
+info:
+  title: Sample User API
+  version: 1.0.0
+servers:
+  - url: "${apigateway_url}"
+paths:
+  /:
+    get:
+      responses:
+        "302":
+          description: "Temporary Redirect"
+          headers:
+            Location:
+              schema:
+                type: string
+      x-amazon-apigateway-integration:
+        responses:
+          default:
+            statusCode: "302"
+            responseParameters:
+              method.response.header.Location: "'${swagger_ui_url}'"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        passthroughBehavior: "when_no_templates"
+        type: "mock"
+  /users/{userId}:
+    get:
+      summary: ユーザー情報を取得（Mock）
+      description: 特定のユーザーIDに対応するユーザー情報を取得します（Mock）。
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ユーザーのID
+          schema:
+            type: string
+      x-amazon-apigateway-integration:
+        type: "mock"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        responses:
+          "default":
+            statusCode: "200"
+            responseTemplates:
+              application/json: "{\"userId\": \"12345\", \"name\": \"田中 太郎\", \"email\": \"tanaka@example.com\"}"
+      responses:
+        '200':
+          description: 成功レスポンス（Mock）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                    example: "12345"
+                  name:
+                    type: string
+                    example: "田中 太郎"
+                  email:
+                    type: string
+                    example: "tanaka@example.com"
+    options:
+      summary: ユーザー情報を取得（Mock）
+      description: 特定のユーザーIDに対応するユーザー情報を取得します（Mock）。
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ユーザーのID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: CORS response
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: "string"
+                default: "*"
+            Access-Control-Allow-Methods:
+              schema:
+                type: "string"
+                default: "GET,POST,OPTIONS"
+            Access-Control-Allow-Headers:
+              schema:
+                type: "string"
+                default: "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+      x-amazon-apigateway-integration:
+        type: "mock"
+        requestTemplates:
+          application/json: "{\"statusCode\": 200}"
+        responses:
+          "default":
+            statusCode: "200"
+            responseTemplates:
+              application/json: "{\"userId\": \"12345\", \"name\": \"田中 太郎\", \"email\": \"tanaka@example.com\"}"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+  /users:
+    post:
+      summary: 新しいユーザーを作成（Mock）
+      description: 新しいユーザー情報を登録します（Mock）。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "山田 花子"
+                email:
+                  type: string
+                  example: "yamada@example.com"
+      x-amazon-apigateway-integration:
+        type: "mock"
+        requestTemplates:
+          application/json: "{\"statusCode\": 201}"
+        responses:
+          "default":
+            statusCode: "201"
+            responseTemplates:
+              application/json: "{\"userId\": \"54321\"}"
+      responses:
+        '201':
+          description: ユーザー作成成功（Mock）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                    example: "54321"

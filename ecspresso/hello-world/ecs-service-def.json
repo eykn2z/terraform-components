@@ -1,0 +1,55 @@
+{
+  "capacityProviderStrategy": [
+    {
+      "base": 0,
+      "capacityProvider": "FARGATE",
+      "weight": 1
+    }
+  ],
+  "deploymentConfiguration": {
+    "deploymentCircuitBreaker": {
+      "enable": true,
+      "rollback": true
+    },
+    "maximumPercent": 200,
+    "minimumHealthyPercent": 100
+  },
+  "deploymentController": {
+    "type": "ECS"
+  },
+  "desiredCount": 2,
+  "enableECSManagedTags": true,
+  "enableExecuteCommand": false,
+  "launchType": "",
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "assignPublicIp": "ENABLED",
+      "securityGroups": [
+        "sg-0249dadc8df01c56b",
+        "sg-06693f862ffb64532"
+      ],
+      "subnets": [
+        "subnet-005fc72d40087a06c",
+        "subnet-0ceaf7e2df23f7dfd",
+        "subnet-0068689ad015b15a1",
+        "subnet-0b8e8e232e9208877",
+        "subnet-09e532f3238a4d9bb",
+        "subnet-0fea0d32af4449bed"
+      ]
+    }
+  },
+  "platformFamily": "Linux",
+  "platformVersion": "LATEST",
+  "propagateTags": "NONE",
+  "schedulingStrategy": "REPLICA",
+  "tags": [
+    {
+      "key": "env",
+      "value": "default"
+    },
+    {
+      "key": "created_by",
+      "value": "terraform"
+    }
+  ]
+}

@@ -10,10 +10,10 @@ terraform {
     }
   }
   backend "s3" {
-    bucket  = "terraform-state-87136"
-    region  = "us-east-1"
-    key     = "terraform.tfstate"
-    encrypt = true
+    key            = "terraform.state"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "terraform-state-lock"
   }
 }
 
@@ -23,7 +23,7 @@ provider "aws" {
   default_tags {
     tags = {
       created_by = "terraform"
-      env = terraform.workspace
+      env        = terraform.workspace
     }
   }
 }
