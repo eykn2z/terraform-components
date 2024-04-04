@@ -36,13 +36,13 @@ output "api_gateway_openapi_invoke_url" {
   value      = can(module.apigateway_openapi_practice[0]) ? module.apigateway_openapi_practice[0].api_invoke_url : null
 }
 
-module "apigateway_resourceproxy_practice" {
-  source     = "./modules/07_apigateway_resourceproxy"
+module "apigateway_proxyresource_practice" {
+  source     = "./modules/07_apigateway_proxyresource"
   aws_region = var.aws_region
   count      = 1
 }
 
-output "api_gateway_resourceproxy_invoke_url" {
-  depends_on = [module.apigateway_resourceproxy_practice]
-  value      = can(module.apigateway_resourceproxy_practice[0]) ? module.apigateway_resourceproxy_practice[0].api_invoke_url : null
+output "api_gateway_proxyresource_invoke_url" {
+  depends_on = [module.apigateway_proxyresource_practice]
+  value      = can(module.apigateway_proxyresource_practice[0]) ? module.apigateway_proxyresource_practice[0].api_invoke_url : null
 }
