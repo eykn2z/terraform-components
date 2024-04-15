@@ -20,6 +20,7 @@ resource "aws_api_gateway_method" "proxy_method" {
   }
 }
 
+
 resource "aws_api_gateway_integration" "proxy_integration" {
   rest_api_id             = aws_api_gateway_rest_api.proxy_sample.id
   resource_id             = aws_api_gateway_resource.proxy_resource.id
@@ -27,14 +28,22 @@ resource "aws_api_gateway_integration" "proxy_integration" {
   integration_http_method = "POST" # Lambda関数との統合で使用するHTTPメソッド
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.inner_routing.invoke_arn
+  content_handling        = "CONVERT_TO_TEXT"
+  depends_on              = [aws_lambda_function.inner_routing]
 }
 
 resource "aws_api_gateway_deployment" "proxy_sample_deployment" {
   depends_on  = [aws_api_gateway_integration.proxy_integration]
   rest_api_id = aws_api_gateway_rest_api.proxy_sample.id
-  stage_name  = "prod"
+}
+
+resource "aws_api_gateway_stage" "proxy_sample_stage" {
+  stage_name    = "prod"
+  rest_api_id   = aws_api_gateway_rest_api.proxy_sample.id
+  deployment_id = aws_api_gateway_deployment.proxy_sample_deployment.id
+
 }
 
 output "api_invoke_url" {
-  value = "https://${aws_api_gateway_rest_api.proxy_sample.id}.execute-api.${var.aws_region}.amazonaws.com/${aws_api_gateway_deployment.proxy_sample_deployment.stage_name}"
+  value = "https://${aws_api_gateway_rest_api.proxy_sample.id}.execute-api.${var.aws_region}.amazonaws.com/${aws_api_gateway_stage.proxy_sample_stage.stage_name}"
 }

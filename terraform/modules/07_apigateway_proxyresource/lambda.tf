@@ -35,3 +35,10 @@ resource "aws_iam_policy_attachment" "lambda_exec_role_policy_attachment" {
   roles      = [aws_iam_role.lambda_exec_role.name]
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
 }
+
+resource "aws_lambda_permission" "api_gateway_permission" {
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.inner_routing.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.proxy_sample.execution_arn}/*/*/*"
+}

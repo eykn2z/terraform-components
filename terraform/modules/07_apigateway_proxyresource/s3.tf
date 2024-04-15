@@ -24,5 +24,5 @@ resource "aws_s3_object" "lambda_inner_routing_object" {
   bucket = aws_s3_bucket.lambda_inner_routing.bucket
   key    = "lambda-inner-routing.zip"
   source = data.archive_file.lambda_inner_routing.output_path
-  etag   = filemd5(data.archive_file.lambda_inner_routing.output_path)
+  etag   = filesha256(data.archive_file.lambda_inner_routing.output_path)
 }
