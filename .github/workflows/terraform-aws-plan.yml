@@ -10,6 +10,10 @@ jobs:
     permissions:
       contents: "read"
       id-token: "write"
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./terraform
     env:
       ENV: aws
       DEPLOY_BRANCH: deploy
