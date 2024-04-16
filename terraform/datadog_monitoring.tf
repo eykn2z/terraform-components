@@ -124,9 +124,9 @@ resource "aws_cloudformation_stack" "datadog_forwarder" {
   name         = "datadog-forwarder"
   capabilities = ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM", "CAPABILITY_AUTO_EXPAND"]
   parameters = {
-    DdApiKey     = data.aws_ssm_parameter.dd_api_key.value,
-    DdSite       = "ap1.datadoghq.com",
-    FunctionName = "datadog-forwarder"
+    DdApiKey       = data.aws_ssm_parameter.dd_api_key.value,
+    DdSite         = "ap1.datadoghq.com",
+    FunctionName   = "datadog-forwarder"
     InstallAsLayer = false
   }
   template_url = "https://datadog-cloudformation-template.s3.amazonaws.com/aws/forwarder/latest.yaml"
