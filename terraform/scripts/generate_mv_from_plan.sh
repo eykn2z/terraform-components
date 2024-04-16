@@ -5,6 +5,13 @@
 
 # プランファイルの生成
 terraform plan -out=tfplan.binary
+plan_status=$?
+
+# plan コマンドが失敗した場合、スクリプトを終了
+if [ $plan_status -ne 0 ]; then
+    echo "Terraform plan failed with status $plan_status"
+    exit $plan_status
+fi
 
 # プランを読みやすい形式に変換
 terraform show -json tfplan.binary > tfplan.json
