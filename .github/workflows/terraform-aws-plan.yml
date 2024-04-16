@@ -26,9 +26,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: test
-        run: |
-          aws s3 ls
+      - name: List contents of S3 bucket
+        run: aws s3 ls s3://practice-terraform-state-default --recursive
 
       - name: Terraform fmt
         id: fmt
