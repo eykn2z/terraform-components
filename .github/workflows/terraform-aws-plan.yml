@@ -15,7 +15,6 @@ jobs:
         shell: bash
         working-directory: ./terraform
     env:
-      ENV: aws
       DEPLOY_BRANCH: deploy
     steps:
       - uses: actions/checkout@v4
@@ -33,7 +32,7 @@ jobs:
 
       - name: Terraform init &setup
         id: init
-        run: terraform init
+        run: terraform init -reconfigure -backend-config="bucket=practice-terraform-state-default"
 
       - name: Terraform Validate
         id: validate
