@@ -1,4 +1,4 @@
-variable "startup_script"{
+variable "startup_script" {
     default = <<-EOF
     #!/bin/bash
     sudo apt update
