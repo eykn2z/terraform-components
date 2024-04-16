@@ -10,7 +10,7 @@ jobs:
     permissions:
       contents: "read"
       id-token: "write"
-    timeout-minutes: 1
+    timeout-minutes: 3
     defaults:
       run:
         shell: bash
