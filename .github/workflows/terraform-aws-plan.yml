@@ -1,9 +1,8 @@
-name: terraform-check
+name: terraform-plan
 on:
   push:
     branches:
       - main
-  pull_request:
 jobs:
   terraform:
     name: Terraform
@@ -12,16 +11,11 @@ jobs:
       contents: "read"
       id-token: "write"
     env:
-      GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
-      GOOGLE_APPLICATION_CREDENTIALS: /tmp/gcp-sa-key.json
       ENV: aws
       DEPLOY_BRANCH: deploy
-      PROJECT_NUMBER: 542927638574
-      PROJECT_NAME: practice-408205
     steps:
       - uses: actions/checkout@v3
       - uses: hashicorp/setup-terraform@v3
-      - run: echo "$GCP_SA_KEY" > $GOOGLE_APPLICATION_CREDENTIALS
       - uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -42,13 +36,16 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color
+        run: terraform plan -no-color 2>&1 | tee plan.txt
         continue-on-error: false
+
+      - name: 'Upload Artifact'
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: plan.txt
+          retention-days: 5
 
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
         run: exit 1
-
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/$DEPLOY_BRANCH' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false
