@@ -28,6 +28,10 @@ jobs:
       - name: test
         run: aws s3 ls
 
+      - name: get caller identity 1
+        run: |
+          aws sts get-caller-identity
+
       - name: Terraform fmt
         id: fmt
         run: terraform fmt -check
