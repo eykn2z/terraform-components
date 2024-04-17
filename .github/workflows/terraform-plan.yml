@@ -34,6 +34,9 @@ jobs:
       - name: Run TFLint
         run:  |
           tflint -f compact || true
+          output=$(tflint --format=json)
+          echo "JSON Output:"
+          echo "$output" | jq .
   terraform:
     name: Terraform test
     runs-on: ubuntu-latest
