@@ -33,10 +33,12 @@ jobs:
 
       - name: Run TFLint
         run:  |
-          tflint -f compact || true
-          output=$(tflint --format=json)
-          echo "JSON Output:"
-          echo "$output" | jq .
+          tflint -f compact --force
+          output=$(tflint --format=json --force)
+          if echo "$output" | jq '.errors | length' | grep -qv 0; then
+            echo "TFLint found errors"
+            exit 1
+          fi
   terraform:
     name: Terraform test
     runs-on: ubuntu-latest
