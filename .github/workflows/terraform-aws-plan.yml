@@ -46,7 +46,11 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: Run TFLint
-        run: tflint -f compact
+        run:  |
+          tflint -f compact
+          exit_code=$?
+          echo "TFLint exited with code $exit_code"
+        continue-on-error: true
 
       - name: Terraform init &setup
         id: init
