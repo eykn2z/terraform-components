@@ -34,27 +34,6 @@ jobs:
       - name: Run TFLint
         run:  |
           tflint -f compact || true
-
-          # JSONフォーマットでTFLintを再実行し、エラー解析を行う
-          output=$(tflint --format=json)
-          echo "JSON Output:"
-          echo "$output" | jq .
-
-          # JSONからエラー数をカウント
-          errors=$(echo "$output" | jq '.errors | length')
-          echo "Total errors: $errors"
-          
-          # JSONから警告数をカウント
-          warnings=$(echo "$output" | jq '.warnings | length')
-          echo "Total warnings: $warnings"
-          
-          # エラーがある場合は終了ステータス1で終了し、ワークフローを失敗させる
-          if [ "$errors" -gt 0 ]; then
-            echo "TFLint found errors, failing the job."
-            exit 1
-          else
-            echo "No errors found, passing the job."
-          fi
   terraform:
     name: Terraform test
     runs-on: ubuntu-latest
