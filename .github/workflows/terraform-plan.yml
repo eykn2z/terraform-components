@@ -33,7 +33,7 @@ jobs:
 
       - name: Run TFLint
         run:  |
-          output=$(tflint -f compact --format=json)
+          output=$(tflint --format=json)
           echo "$output"
           if echo "$output" | jq '.errors | length' | grep -qv 0; then
             echo "TFLint found errors"
