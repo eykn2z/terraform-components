@@ -4,6 +4,40 @@ on:
     branches:
       - main
 jobs:
+  tflint:
+    name: TFlint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: "read"
+      id-token: "write"
+    timeout-minutes: 3
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./terraform
+    steps:
+      - uses: actions/cache@v4
+        name: Cache plugin dir
+        with:
+          path: ~/.tflint.d/plugins
+          key: ubuntu-latest-tflint-${{ hashFiles('.tflint.hcl') }}
+
+      - uses: terraform-linters/setup-tflint@v4
+        name: Setup TFLint
+
+      - name: Init TFLint
+        run: tflint --init
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Run TFLint
+        run:  |
+          output=$(tflint --module --format=json)
+          echo "$output"
+          if echo "$output" | jq '.errors | length' | grep -qv 0; then
+            echo "TFLint found errors"
+            exit 1
+          fi
   terraform:
     name: Terraform test
     runs-on: ubuntu-latest
@@ -29,27 +63,6 @@ jobs:
       - name: Terraform fmt
         id: fmt
         run: terraform fmt -check
-        continue-on-error: true
-
-      - uses: actions/cache@v4
-        name: Cache plugin dir
-        with:
-          path: ~/.tflint.d/plugins
-          key: ubuntu-latest-tflint-${{ hashFiles('.tflint.hcl') }}
-
-      - uses: terraform-linters/setup-tflint@v4
-        name: Setup TFLint
-
-      - name: Init TFLint
-        run: tflint --init
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-
-      - name: Run TFLint
-        run:  |
-          tflint -f compact
-          exit_code=$?
-          echo "TFLint exited with code $exit_code"
         continue-on-error: true
 
       - name: Terraform init &setup
