@@ -31,7 +31,7 @@ env=$AWS_PROFILE
 terraform workspace select $env
 terraform init -reconfigure -backend-config="bucket=practice-terraform-state-${env}"
 terraform plan
-terrafrom apply --auto-approve
+terraform apply --auto-approve
 ```
 1. 削除
 ```bash

@@ -1,5 +1,10 @@
-module "base" {
-  source = "./modules/01_base"
+# module "base" {
+#   source = "./modules/00_base"
+#   count  = 1
+# }
+
+module "ec2_practice" {
+  source = "./modules/01_ec2"
   count  = 0
 }
 
@@ -16,7 +21,7 @@ module "eks_practice" {
 
 module "ecs_practice" {
   source = "./modules/04_ecs"
-  count  = 0
+  count  = 1
 }
 
 module "rds_practice" {
@@ -39,7 +44,7 @@ output "api_gateway_openapi_invoke_url" {
 module "apigateway_proxyresource_practice" {
   source     = "./modules/07_apigateway_proxyresource"
   aws_region = data.aws_region.current.name
-  count      = 1
+  count      = 0
 }
 
 output "api_gateway_proxyresource_invoke_url" {
