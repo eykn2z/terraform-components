@@ -1,6 +1,11 @@
 name: terraform-plan
 on:
   workflow_dispatch:
+    inputs:
+      do-deploy:
+        type: boolean
+        description: deploy trigger
+        default: false
   push:
     branches:
       - main
