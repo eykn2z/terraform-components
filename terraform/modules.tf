@@ -21,7 +21,7 @@ module "eks_practice" {
 
 module "ecs_practice" {
   source = "./modules/04_ecs"
-  count  = 1
+  count  = 0
 }
 
 module "rds_practice" {
