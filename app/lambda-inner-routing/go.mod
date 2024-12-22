@@ -1,10 +1,12 @@
 module lambda-inner-routing
 
-go 1.19
+go 1.21
+
+toolchain go1.23.4
 
 require (
 	github.com/aws/aws-lambda-go v1.46.0
-	github.com/awslabs/aws-lambda-go-api-proxy v0.16.1
+	github.com/awslabs/aws-lambda-go-api-proxy v0.16.2
 	github.com/gin-gonic/gin v1.9.1
 )
 
@@ -31,6 +33,6 @@ require (
 	golang.org/x/net v0.20.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	google.golang.org/protobuf v1.32.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
