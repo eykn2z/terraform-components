@@ -1,0 +1,88 @@
+name: 'Branch Deploy Composite'
+description: 'IssueOpsコマンドでbranch-deployとTerraform Plan/Applyを実行するcomposite action'
+
+runs:
+  using: composite
+  steps:
+    - name: branch-deploy
+      id: branch-deploy
+      uses: github/branch-deploy@v10
+      with:
+        trigger: ".deploy"
+        noop_trigger: ".noop"
+        help_trigger: ".deploy_help"
+        lock_trigger: ".deploy_lock"
+        unlock_trigger: ".deploy_unlock"
+        lock_info_alias: ".deploy_wcid"
+        environment: "infra"
+        environment_targets: "dev,dev1,dev2,dev3,dev4,infra,haposoft,haposoft-1,haposoft-2,stg"
+
+    - name: Determine Execution Environment
+      id: exec_env
+      if: steps.branch-deploy.outputs.continue == 'true'
+      shell: bash
+      run: |
+        echo "exec_env=${{ steps.branch-deploy.outputs.environment }}" >> $GITHUB_OUTPUT
+
+    - name: Get AWS Account ID
+      id: aws_account
+      if: steps.branch-deploy.outputs.continue == 'true'
+      shell: bash
+      run: |
+        ENV="${{ steps.exec_env.outputs.exec_env }}"
+        ACCOUNT_VAR="AWS_ACCOUNT_ID_${ENV}"
+        ACCOUNT_ID="${!ACCOUNT_VAR}"
+        echo "account_id=$ACCOUNT_ID" >> $GITHUB_OUTPUT
+
+    - name: Get AWS Role Name
+      id: role_name
+      if: steps.branch-deploy.outputs.continue == 'true'
+      shell: bash
+      run: |
+        echo "role_name=$(make print-role env=${{ steps.exec_env.outputs.exec_env }} | tail -1)" >> $GITHUB_OUTPUT
+
+    - name: Configure AWS Credentials
+      if: steps.branch-deploy.outputs.continue == 'true'
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: arn:aws:iam::${{ steps.aws_account.outputs.account_id }}:role/${{ steps.role_name.outputs.role_name }}
+        aws-region: ap-northeast-1
+
+    - name: Terragrunt Plan/Apply
+      if: steps.branch-deploy.outputs.continue == 'true'
+      shell: bash
+      env:
+        TG_NON_INTERACTIVE: true
+        TG_NO_COLOR: true
+        CI: true
+      run: |
+        set -o pipefail
+        if [[ "${{ steps.branch-deploy.outputs.noop }}" == "true" ]]; then
+          make plan env=${{ steps.exec_env.outputs.exec_env }} 2>&1 | tee plan.out
+        else
+          make apply env=${{ steps.exec_env.outputs.exec_env }} 2>&1 | tee apply.out
+        fi
+
+    - name: Update Pull Request (Plan)
+      if: steps.branch-deploy.outputs.continue == 'true' && steps.branch-deploy.outputs.noop == 'true' && success()
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ github.token }}
+        script: |
+          const fs = require('fs');
+          const planOutput = fs.readFileSync('plan.out', 'utf8');
+          const comment = `### Terragrunt Plan Output\n<details>\n  <summary>クリックして展開</summary>\n\n  \`\`\`diff\n  ${planOutput}\n  \`\`\`\n\n</details>`;
+          github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: comment
+          });
+
+    - name: Post Apply Summary
+      if: steps.branch-deploy.outputs.continue == 'true' && steps.branch-deploy.outputs.noop != 'true' && success()
+      shell: bash
+      run: |
+        echo "## Apply Summary" >> $GITHUB_STEP_SUMMARY
+        echo "Environment: ${{ steps.exec_env.outputs.exec_env }}" >> $GITHUB_STEP_SUMMARY
+        echo "Status: ✅ Successfully applied" >> $GITHUB_STEP_SUMMARY 

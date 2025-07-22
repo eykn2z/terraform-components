@@ -1,0 +1,93 @@
+name: Development Deploy
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  pull-requests: write
+  deployments: write
+  contents: write
+  checks: read
+  statuses: read
+
+
+jobs:
+  determine-environment:
+    name: Determine Environment
+    runs-on: ubuntu-latest
+    outputs:
+      target_env: ${{ steps.determine.outputs.target_env }}
+      deploy_type: ${{ steps.determine.outputs.deploy_type }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Determine Environment
+        id: determine
+        uses: ./.github/actions/determine-environment
+        with:
+          branch_pattern: dev
+
+  branch-deploy:
+    name: Branch Deploy (IssueOps)
+    runs-on: ubuntu-latest
+    if: ${{ github.event.issue.pull_request }}
+    outputs:
+      continue: ${{ steps.branch_deploy.outputs.continue }}
+      noop: ${{ steps.branch_deploy.outputs.noop }}
+      sha: ${{ steps.branch_deploy.outputs.sha }}
+      environment: ${{ steps.branch_deploy.outputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Branch Deploy
+        id: branch_deploy
+        uses: ./.github/actions/branch-deploy
+
+  plan:
+    name: Plan
+    needs: [determine-environment, branch-deploy]
+    if: |
+      github.event_name == 'issue_comment'
+      && needs.branch-deploy.outputs.continue == 'true'
+      && needs.branch-deploy.outputs.noop == 'true'
+      && needs.determine-environment.outputs.target_env != 'prod'
+      && (
+        needs.determine-environment.outputs.target_env != 'stg'
+        || needs.determine-environment.outputs.base_ref == 'develop'
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Terraform Environment
+        uses: ./.github/actions/setup-terraform
+        with:
+          ref: ${{ github.event.issue.pull_request.base.ref }}
+      - name: Terraform Plan
+        uses: ./.github/actions/terraform-plan
+        with:
+          exec_env: ${{ needs.determine-environment.outputs.target_env }}
+          deploy_type: ${{ needs.determine-environment.outputs.deploy_type }}
+
+  apply:
+    name: Apply
+    needs: [determine-environment, branch-deploy, plan]
+    if: |
+      github.event_name == 'issue_comment'
+      && needs.branch-deploy.outputs.continue == 'true'
+      && needs.branch-deploy.outputs.noop != 'true'
+      && needs.determine-environment.outputs.target_env != 'prod'
+      && (
+        needs.determine-environment.outputs.target_env != 'stg'
+        || needs.determine-environment.outputs.base_ref == 'develop'
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Terraform Environment
+        uses: ./.github/actions/setup-terraform
+        with:
+          ref: ${{ github.event.issue.pull_request.base.ref }}
+      - name: Terraform Apply
+        uses: ./.github/actions/terraform-apply
+        with:
+          exec_env: ${{ needs.determine-environment.outputs.target_env }}
+          deploy_type: ${{ needs.determine-environment.outputs.deploy_type }}
