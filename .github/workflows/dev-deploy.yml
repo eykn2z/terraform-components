@@ -1,93 +1,44 @@
-name: Development Deploy
+name: "branch deploy demo"
 
+# The workflow to execute on is comments that are newly created
 on:
   issue_comment:
     types: [created]
 
+# Permissions needed for reacting and adding comments for IssueOps commands
 permissions:
   pull-requests: write
   deployments: write
   contents: write
   checks: read
-  statuses: read
-
 
 jobs:
-  determine-environment:
-    name: Determine Environment
+  demo:
+    if: ${{ github.event.issue.pull_request }} # only run on pull request comments
     runs-on: ubuntu-latest
-    outputs:
-      target_env: ${{ steps.determine.outputs.target_env }}
-      deploy_type: ${{ steps.determine.outputs.deploy_type }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Determine Environment
-        id: determine
-        uses: ./.github/actions/determine-environment
+      # Execute IssueOps branch deployment logic, hooray!
+      # This will be used to "gate" all future steps below and conditionally trigger steps/deployments
+      - uses: github/branch-deploy@v6.0.1
+        id: branch-deploy
         with:
-          branch_pattern: dev
+          trigger: ".deploy"
 
-  branch-deploy:
-    name: Branch Deploy (IssueOps)
-    runs-on: ubuntu-latest
-    if: ${{ github.event.issue.pull_request }}
-    outputs:
-      continue: ${{ steps.branch_deploy.outputs.continue }}
-      noop: ${{ steps.branch_deploy.outputs.noop }}
-      sha: ${{ steps.branch_deploy.outputs.sha }}
-      environment: ${{ steps.branch_deploy.outputs.environment }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Branch Deploy
-        id: branch_deploy
-        uses: ./.github/actions/branch-deploy
+      # Run your deployment logic for your project here - examples seen below
 
-  plan:
-    name: Plan
-    needs: [determine-environment, branch-deploy]
-    if: |
-      github.event_name == 'issue_comment'
-      && needs.branch-deploy.outputs.continue == 'true'
-      && needs.branch-deploy.outputs.noop == 'true'
-      && needs.determine-environment.outputs.target_env != 'prod'
-      && (
-        needs.determine-environment.outputs.target_env != 'stg'
-        || needs.determine-environment.outputs.base_ref == 'develop'
-      )
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Terraform Environment
-        uses: ./.github/actions/setup-terraform
+      # Checkout your projects repository based on the ref provided by the branch-deploy step
+      - uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.issue.pull_request.base.ref }}
-      - name: Terraform Plan
-        uses: ./.github/actions/terraform-plan
-        with:
-          exec_env: ${{ needs.determine-environment.outputs.target_env }}
-          deploy_type: ${{ needs.determine-environment.outputs.deploy_type }}
+          ref: ${{ steps.branch-deploy.outputs.ref }}
 
-  apply:
-    name: Apply
-    needs: [determine-environment, branch-deploy, plan]
-    if: |
-      github.event_name == 'issue_comment'
-      && needs.branch-deploy.outputs.continue == 'true'
-      && needs.branch-deploy.outputs.noop != 'true'
-      && needs.determine-environment.outputs.target_env != 'prod'
-      && (
-        needs.determine-environment.outputs.target_env != 'stg'
-        || needs.determine-environment.outputs.base_ref == 'develop'
-      )
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Terraform Environment
-        uses: ./.github/actions/setup-terraform
-        with:
-          ref: ${{ github.event.issue.pull_request.base.ref }}
-      - name: Terraform Apply
-        uses: ./.github/actions/terraform-apply
-        with:
-          exec_env: ${{ needs.determine-environment.outputs.target_env }}
-          deploy_type: ${{ needs.determine-environment.outputs.deploy_type }}
+      # Do some fake "noop" deployment logic here
+      # conditionally run a noop deployment
+      - name: fake noop deploy
+        if: ${{ steps.branch-deploy.outputs.continue == 'true' && steps.branch-deploy.outputs.noop == 'true' }}
+        run: echo "I am doing a fake noop deploy"
+
+      # Do some fake "regular" deployment logic here
+      # conditionally run a regular deployment
+      - name: fake regular deploy
+        if: ${{ steps.branch-deploy.outputs.continue == 'true' && steps.branch-deploy.outputs.noop != 'true' }}
+        run: echo "I am doing a fake regular deploy"
