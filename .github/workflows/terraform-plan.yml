@@ -63,7 +63,7 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.8.1"
-      - uses: aws-actions/configure-aws-credentials@v1
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: 'us-east-1'
           role-to-assume: 'arn:aws:iam::791848147212:role/github-oidc-role'
