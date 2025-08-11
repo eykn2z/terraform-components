@@ -22,7 +22,7 @@ jobs:
         shell: bash
         working-directory: ./terraform
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/cache@v4
         name: Cache plugin dir
         with:
@@ -59,7 +59,7 @@ jobs:
     env:
       DEPLOY_BRANCH: deploy
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.8.1"
