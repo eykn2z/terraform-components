@@ -1,0 +1,35 @@
+name: 'Setup Terraform Environment'
+description: 'Setup Terraform, Terragrunt and cache for CI/CD'
+
+inputs:
+  ref:
+    description: 'Git reference to checkout'
+    required: false
+    default: ''
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.ref }}
+
+    - name: Setup Terragrunt
+      shell: bash
+      run: |
+        wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.55.0/terragrunt_linux_amd64
+        chmod +x terragrunt_linux_amd64
+        sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
+        aws --version
+
+    - uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "1.8.1"
+
+    - name: Cache Terraform
+      uses: actions/cache@v4
+      with:
+        path: |
+          **/.terraform
+          **/.terraform.lock.hcl
+        key: ${{ runner.os }}-terraform-${{ hashFiles('**/*.tf', '**/*.hcl') }} 

@@ -1,0 +1,118 @@
+name: 'Determine Environment'
+description: 'Determine target environment based on branch and IssueOps commands'
+
+inputs:
+  branch_pattern:
+    description: 'Branch pattern to match (dev or prod)'
+    required: true
+
+outputs:
+  target_env:
+    description: 'Target environment name'
+    value: ${{ steps.env.outputs.target_env }}
+  deploy_type:
+    description: 'Deploy type'
+    value: ${{ steps.env.outputs.deploy_type }}
+  base_ref:
+    description: 'Base ref'
+    value: ${{ steps.prbase.outputs.base_ref }}
+
+runs:
+  using: composite
+  steps:
+    - name: Parse IssueOps
+      id: issueops
+      shell: bash
+      run: |
+        if [[ "${{ github.event.pull_request.body }}" =~ \.deploy[[:space:]]+([a-zA-Z0-9_-]+) ]]; then
+          echo "deploy_env=${BASH_REMATCH[1]}" >> $GITHUB_OUTPUT
+          echo "has_issueops=true" >> $GITHUB_OUTPUT
+        else
+          echo "deploy_env=" >> $GITHUB_OUTPUT
+          echo "has_issueops=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Determine Environment
+      id: env
+      shell: bash
+      run: |
+        BRANCH="${{ github.event.pull_request.base.ref }}"
+        
+        if [[ "${{ inputs.branch_pattern }}" == "dev" ]]; then
+          case $BRANCH in
+            "develop")
+              echo "target_env=stg" >> $GITHUB_OUTPUT
+              echo "deploy_type=issueops" >> $GITHUB_OUTPUT
+              ;;
+            feature/*)
+              if [[ "${{ steps.issueops.outputs.has_issueops }}" == "true" ]]; then
+                ENV="${{ steps.issueops.outputs.deploy_env }}"
+                if [[ "$ENV" == "alldev" ]]; then
+                  echo "target_env=dev1" >> $GITHUB_OUTPUT
+                  echo "deploy_type=alldev" >> $GITHUB_OUTPUT
+                else
+                  echo "target_env=$ENV" >> $GITHUB_OUTPUT
+                  echo "deploy_type=issueops" >> $GITHUB_OUTPUT
+                fi
+              else
+                echo "target_env=dev1" >> $GITHUB_OUTPUT
+                echo "deploy_type=auto" >> $GITHUB_OUTPUT
+              fi
+              ;;
+            hotfix/*)
+              if [[ "${{ steps.issueops.outputs.has_issueops }}" == "true" ]]; then
+                ENV="${{ steps.issueops.outputs.deploy_env }}"
+                if [[ "$ENV" == "stg" ]]; then
+                  echo "target_env=stg" >> $GITHUB_OUTPUT
+                  echo "deploy_type=issueops" >> $GITHUB_OUTPUT
+                else
+                  echo "target_env=stg" >> $GITHUB_OUTPUT
+                  echo "deploy_type=auto" >> $GITHUB_OUTPUT
+                fi
+              else
+                echo "target_env=stg" >> $GITHUB_OUTPUT
+                echo "deploy_type=auto" >> $GITHUB_OUTPUT
+              fi
+              ;;
+            *)
+              echo "target_env=dev1" >> $GITHUB_OUTPUT
+              echo "deploy_type=auto" >> $GITHUB_OUTPUT
+              ;;
+          esac
+        elif [[ "${{ inputs.branch_pattern }}" == "prod" ]]; then
+          if [[ "$BRANCH" == "main" ]]; then
+            echo "target_env=prod" >> $GITHUB_OUTPUT
+            echo "deploy_type=auto" >> $GITHUB_OUTPUT
+          elif [[ "$BRANCH" == prod-only/* ]]; then
+            if [[ "${{ steps.issueops.outputs.has_issueops }}" == "true" ]]; then
+              ENV="${{ steps.issueops.outputs.deploy_env }}"
+              if [[ "$ENV" == "prod" ]]; then
+                echo "target_env=prod" >> $GITHUB_OUTPUT
+                echo "deploy_type=plan_only" >> $GITHUB_OUTPUT
+              else
+                echo "target_env=stg" >> $GITHUB_OUTPUT
+                echo "deploy_type=issueops" >> $GITHUB_OUTPUT
+              fi
+            else
+              echo "target_env=stg" >> $GITHUB_OUTPUT
+              echo "deploy_type=auto" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "target_env=stg" >> $GITHUB_OUTPUT
+            echo "deploy_type=auto" >> $GITHUB_OUTPUT
+          fi
+        fi 
+
+    - name: Get PR base ref
+      id: prbase
+      shell: bash
+      run: |
+        if [[ -n "${{ github.event.issue.pull_request.url }}" ]]; then
+          PR_NUMBER=$(echo "${{ github.event.issue.pull_request.url }}" | grep -oE '[0-9]+$')
+          BASE_REF=$(gh pr view $PR_NUMBER --json baseRefName -q .baseRefName)
+          echo "base_ref=$BASE_REF" >> $GITHUB_OUTPUT
+        else
+          echo "base_ref=" >> $GITHUB_OUTPUT
+        fi
+      env:
+        GH_TOKEN: ${{ github.token }} 
