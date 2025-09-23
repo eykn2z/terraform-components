@@ -1,0 +1,25 @@
+# # 呼び出し側のワークフロー (.github/workflows/main.yml)
+# name: CI Pipeline
+
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
+
+# jobs:
+#   build-project:
+#     uses: ./.github/workflows/reusable-build.yml
+#     with:
+#       node-version: '18.x'
+#     secrets:
+#       build-command: 'build:prod'
+
+#   lint:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#       - name: Run lint
+#         run: |
+#           npm ci
+#           npm run lint
