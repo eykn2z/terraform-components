@@ -66,7 +66,7 @@ jobs:
       - uses: autero1/action-terragrunt@v3
         with:
           terragrunt_version: latest
-      - uses: aws-actions/configure-aws-credentials@v1
+      - uses: aws-actions/configure-aws-credentials@v5
         with:
           aws-region: "${{ secrets.AWS_REGION }}"
           role-to-assume: "${{ secrets.AWS_ROLE_TO_ASSUME }}"
