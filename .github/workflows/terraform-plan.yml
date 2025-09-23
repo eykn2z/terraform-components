@@ -38,7 +38,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: Run TFLint
-        run:  |
+        run: |
           tflint -f compact --force
           output=$(tflint --format=json --force)
           if echo "$output" | jq '.errors | length' | grep -qv 0; then
@@ -46,7 +46,7 @@ jobs:
             exit 1
           fi
   terraform:
-    name: Terraform test
+    name: Terragrunt plan
     runs-on: ubuntu-latest
     permissions:
       contents: "read"
@@ -63,30 +63,35 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.8.1"
-      - uses: aws-actions/configure-aws-credentials@v5
+      - uses: autero1/action-terragrunt@v3
         with:
-          aws-region: 'us-east-1'
-          role-to-assume: 'arn:aws:iam::791848147212:role/github-oidc-role'
+          terragrunt_version: latest
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: "${{ secrets.AWS_REGION }}"
+          role-to-assume: "${{ secrets.AWS_ROLE_TO_ASSUME }}"
 
       - name: Terraform fmt
         id: fmt
         run: terraform fmt -check
         continue-on-error: true
 
-      - name: Terraform init &setup
-        id: init
-        run: terraform init -reconfigure -backend-config="bucket=practice-terraform-state-default"
+      - name: Terragrunt Init
+        id: tg-init
+        env:
+          TG_ENV: dev
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: terragrunt run-all init -reconfigure
 
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate -no-color
-
-      - name: Terraform Plan
+      - name: Terragrunt Plan
         id: plan
-        run: terraform plan -no-color 2>&1 | tee plan.txt
+        env:
+          TG_ENV: dev
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+        run: terragrunt run-all plan -no-color 2>&1 | tee plan.txt
         continue-on-error: false
 
-      - name: 'Upload Artifact'
+      - name: "Upload Artifact"
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan
