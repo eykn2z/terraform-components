@@ -1,11 +1,13 @@
 {
   "extends": ["config:base"],
   "automerge": true,
+  "platformAutomerge": true,
   "automergeType": "pr",
   "automergeStrategy": "auto",
   "prHourlyLimit": 0,
   "prConcurrentLimit": 0,
   "rebaseWhen": "conflicted",
+  "stabilityDays": 0,
   "packageRules": [
     {
       "matchUpdateTypes": [
@@ -16,7 +18,8 @@
         "pinDigest",
         "lockFileMaintenance"
       ],
-      "automerge": true
+      "automerge": true,
+      "ignoreTests": true
     }
   ]
 }
