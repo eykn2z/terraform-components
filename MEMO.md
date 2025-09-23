@@ -1,7 +1,8 @@
-# command
+# Commands
+
 ```bash
-terraform init # moduleとしてimportさせないとサブディレクトリは認識されない
-terraform plan #事前確認
+terraform init # Subdirectories are not recognized unless imported as a module
+terraform plan # Pre-check
 terraform plan -var-file env/dev.tfvars
 terraform apply
 terraform apply -var "instance_name=YetAnotherName" # var.instance_name
@@ -9,45 +10,54 @@ terraform destroy
 
 terrafom output
 
-# terraform管理されていないリソースをterraform管理にする
+# Bring non-Terraform-managed resources under Terraform management
 terraform import <option> resource ID
 ```
 
-# AWS,GCP等環境による使い分け
+# Environment separation for AWS and GCP
+
 ```
 terraform workspace new aws
 terraform workspace new gcp
 terraform workspace select aws
 ```
-この場合、環境ごとの管理はどうなる
-共通部分をvariablesに入れる
 
-# 共通パラメータ
+In this case, how should environment-specific management be handled?
+Put common parts into variables.
+
+# Common parameters
+
 - count
-  - moduleごとに設定し、リソースを作成するかどうか分岐可能
-    - vpc_network等一部リソースでcountが使えないためmoduleにcountをつける方がよさそう
+  - Set per module to control whether to create resources
+    - Some resources (e.g., vpc_network) do not support count, so it's better to place count on modules
 
-# github actions
-- aws,gcpに向けてdeploy
-- *.tfの修正があった場合にactionを走らせる
-- deployブランチにpushがあった場合applyする
-- どちらの環境に適用するかは環境変数で指定
-- 認証パターン
-  - secretsにキーを入れて認証させるパターン
+# GitHub Actions
+
+- Deploy to AWS and GCP
+- Trigger actions when \*.tf files are modified
+- Apply when pushing to the deploy branch
+- Specify which environment to apply to via environment variables
+- Authentication patterns
+  - Use secrets to store keys for authentication
   - https://note.com/shift_tech/n/n61146784b54f
----
-- prod,dev
-  - PRがマージされたタイミングでapply
-    - 対象branchへのpushを許可しない
-    - マージルールの明確化
-- prod
-  - より厳密なマージルール
 
-# コーディング規約
+---
+
+- prod, dev
+  - Apply when PRs are merged
+    - Disallow direct push to target branches
+    - Clarify merge rules
+- prod
+  - Stricter merge rules
+
+# Coding conventions
+
 https://miraitranslate-tech.hatenablog.jp/entry/2023/03/10/120000
 
-# 差分
-apply後、planすると差分が表示される
+# Diffs
+
+After apply, running plan will show the differences
+
 ```bash
 % terraform plan --detailed-exitcode
 module.flask.module.aws[0].aws_instance.flask_server_aws: Refreshing state... [id=i-0e4b1d033f10aee3c]
@@ -82,32 +92,39 @@ Note: You didn't use the -out option to save this plan, so Terraform can't guara
 exactly these actions if you run "terraform apply" now.
 ```
 
-# terraform管理repository以外からの操作禁止
-- ユーザーに割り当てるポリシーに禁止事項を追加
-- 管理repository用ロールは操作を許可
+# Prohibit operations outside the Terraform management repository
 
-# cloudformationのようにマネジメントコンソールからも作成したリソースをグループ化したい
-- tag付のルール化
-- AWS: Service Catalogの1活用
+- Add restrictions to policies assigned to users
+- Allow operations only via the role used by the management repository
 
-# state管理
-- リソースのstateはterraform applyされた環境に残る.tfstateで管理される
-- 共同開発する際は.tfstateを共有する/リモートバックエンドを使う
-    > - Amazon S3: AWSのS3バケットを使用して状態ファイルを保存し、オプションでDynamoDBを使ってロックと一貫性の管理を行う
-    > - Terraform Cloud/Enterprise: HashiCorpが提供するTerraform CloudやTerraform Enterpriseを使用して、状態ファイルを安全に管理
-    > - Google Cloud Storage: GCPのCloud Storageバケットを使用して状態ファイルを保存
-    > - Azure Blob Storage: AzureのBlob Storageを使用して状態ファイルを保存
-- S3のリモートバックエンドはS3バケットの管理が必要になるので、大人しくTerraform Cloudでマージトリガーでapplyするようにするでよさそう
+# Group resources created from the Management Console as with CloudFormation
+
+- Establish tagging rules
+- AWS: Consider using Service Catalog
+
+# State management
+
+- Resource state is managed in the .tfstate left in the environment where terraform apply was run
+- For collaborative work, share .tfstate or use a remote backend
+  > - Amazon S3: Store state files in an S3 bucket and optionally use DynamoDB for locking and consistency
+  > - Terraform Cloud/Enterprise: Use Terraform Cloud or Terraform Enterprise by HashiCorp to manage state securely
+  > - Google Cloud Storage: Store state files in GCP Cloud Storage
+  > - Azure Blob Storage: Store state files in Azure Blob Storage
+- Since the S3 remote backend requires managing an S3 bucket, it may be simpler to use Terraform Cloud and apply on merge triggers
   - https://qiita.com/hiyanger/items/e60ed7600d0cda120482
 
-# 既存のリソースをterraform管理下にする
-1. 空のリソースを作成(デフォルトの)
-2. import
+# Bring existing resources under Terraform management
+
+1. Create an empty (default) resource
+2. Import
+
 ```
-terraform import <リソース名> ID
+terraform import <resource_name> ID
 ```
-3. 設定コード化
+
+3. Codify the configuration
+
 ```
-# 現在の設定の確認->copy&paste
-terraform state show <リソース名>
+# Check current settings -> copy & paste
+terraform state show <resource_name>
 ```

@@ -135,3 +135,5 @@ resource "aws_cloudformation_stack" "datadog_forwarder" {
     ignore_changes = [parameters["DdApiKey"]]
   }
 }
+
+
