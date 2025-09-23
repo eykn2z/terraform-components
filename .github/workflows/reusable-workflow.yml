@@ -1,0 +1,33 @@
+name: Reusable Build Process
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        required: true
+        type: string
+        description: "Node.jsのバージョン"
+    secrets:
+      build-command:
+        required: false
+        description: "ビルドコマンド"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run build
+        run: npm run ${{ inputs.build-command }}
+
+      - name: Run tests
+        run: npm test

@@ -1,0 +1,13 @@
+# name: Development Pipeline
+
+# on:
+#   push:
+#     branches: [ develop ]
+
+# jobs:
+#   build-dev:
+#     uses: ./.github/workflows/reusable-build.yml
+#     with:
+#       node-version: '20.x'
+#     secrets:
+#       build-command: 'build:dev'
