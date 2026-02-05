@@ -43,7 +43,7 @@ runs:
 
     - name: Configure AWS Credentials
       if: steps.branch-deploy.outputs.continue == 'true'
-      uses: aws-actions/configure-aws-credentials@v4
+      uses: aws-actions/configure-aws-credentials@v6
       with:
         role-to-assume: arn:aws:iam::${{ steps.aws_account.outputs.account_id }}:role/${{ steps.role_name.outputs.role_name }}
         aws-region: ap-northeast-1
