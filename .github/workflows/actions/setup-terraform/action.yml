@@ -22,7 +22,7 @@ runs:
         sudo mv terragrunt_linux_amd64 /usr/local/bin/terragrunt
         aws --version
 
-    - uses: hashicorp/setup-terraform@v3
+    - uses: hashicorp/setup-terraform@v4
       with:
         terraform_version: "1.8.1"
 
