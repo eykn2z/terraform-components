@@ -6,7 +6,7 @@ runs:
   steps:
     - name: branch-deploy
       id: branch-deploy
-      uses: github/branch-deploy@v10
+      uses: github/branch-deploy@v12
       with:
         trigger: ".deploy"
         noop_trigger: ".noop"
