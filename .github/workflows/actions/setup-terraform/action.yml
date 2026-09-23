@@ -24,7 +24,7 @@ runs:
 
     - uses: hashicorp/setup-terraform@v3
       with:
-        terraform_version: "1.8.1"
+        terraform_version: "v1.16.4"
 
     - name: Cache Terraform
       uses: actions/cache@v4
